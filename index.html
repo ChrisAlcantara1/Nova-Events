@@ -10,7 +10,7 @@
     <meta property="og:description" content="Lanzamiento de NOVA Events. Festival de música electrónica. Detalles y preventa aquí." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="og-reflex.jpg" />
-    <meta property="og:url" content="https://chrisalcantara1.github.io/Nova/" />
+    <meta property="og:url" content="https://chrisalcantara1.github.io/Nova-Events/" />
     <meta name="theme-color" content="#000000" />
     <link rel="icon" href="favicon.ico" />
     <style>
@@ -33,23 +33,50 @@
       .note{color:var(--muted);font-size:14px}
       .footer{color:var(--muted);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:48px}
       .btn-row{display:flex;flex-wrap:wrap;gap:12px}
+
+      /* Fondo con glow animado VISIBLE y fluido */
       .hero-wrap{position:relative;min-height:68vh;display:grid;align-items:center;overflow:hidden;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.02)}
-      .hero-bg{position:absolute;inset:0;background:
-        radial-gradient(1200px 600px at 10% 10%, rgba(166,227,255,.14), transparent),
-        radial-gradient(1000px 500px at 90% 90%, rgba(255,255,255,.06), transparent),
-        linear-gradient(180deg, rgba(255,255,255,.04), transparent 40%)
+      .hero-bg{
+        position:absolute; inset:0;
+        background:
+          radial-gradient(1200px 600px at var(--x,15%) var(--y,20%), rgba(166,227,255,.18), transparent 60%),
+          radial-gradient(1000px 500px at 85% 85%, rgba(255,255,255,.10), transparent 60%),
+          linear-gradient(180deg, rgba(255,255,255,.06), transparent 40%);
+        animation:bgShift 10s ease-in-out infinite;
+        will-change: background-position;
       }
-      .glow{position:absolute;filter:blur(60px);opacity:.55;mix-blend:screen;animation:float 14s ease-in-out infinite}
-      .glow.one{width:420px;height:420px;background:#a6e3ff;top:-60px;left:-80px}
-      .glow.two{width:360px;height:360px;background:#ffffff;bottom:-60px;right:-80px;animation-delay:3s}
-      @keyframes float{0%,100%{transform:translateY(-6px)}50%{transform:translateY(6px)}}
+      @keyframes bgShift{
+        0%   { --x:15%; --y:20%; }
+        50%  { --x:80%; --y:45%; }
+        100% { --x:15%; --y:20%; }
+      }
+      .glow{
+        position:absolute; filter:blur(60px);
+        opacity:.75; mix-blend:screen;
+        animation:float 8s ease-in-out infinite;
+        will-change: transform;
+        transform: translateZ(0);
+      }
+      .glow.one{ width:520px; height:520px; background:#a6e3ff; top:-80px; left:-100px; }
+      .glow.two{ width:440px; height:440px; background:#ffffff; bottom:-80px; right:-100px; animation-delay:1.5s; }
+      @keyframes float{
+        0%,100%{ transform: translateY(-16px); }
+        50%    { transform: translateY(16px); }
+      }
+
       .hero{position:relative;padding:72px 24px}
       .logo{font-weight:900;letter-spacing:.16em}
       .kw{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
       .kw .pill{background:rgba(255,255,255,.02)}
+
       .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
       @media(min-width:900px){.gallery{grid-template-columns:repeat(6,1fr)}}
       .gallery img{width:100%;height:160px;object-fit:cover;border-radius:12px;border:1px solid var(--border)}
+
+      /* Respeta usuarios con “reducir movimiento” */
+      @media (prefers-reduced-motion: reduce){
+        .hero-bg, .glow{ animation: none !important; }
+      }
     </style>
   </head>
   <body>
@@ -139,5 +166,36 @@
     <footer class="footer">
       © 2025 NOVA Events · REFLEX · Tarimoro, Guanajuato
     </footer>
+
+    <!-- Movimiento interactivo del fondo -->
+    <script>
+      (function(){
+        const bg = document.querySelector('.hero-bg');
+        if(!bg) return;
+
+        let x = 15, y = 20; // % iniciales
+        let tx = x, ty = y;
+
+        function animate(){
+          x += (tx - x) * 0.08;
+          y += (ty - y) * 0.08;
+          bg.style.setProperty('--x', x + '%');
+          bg.style.setProperty('--y', y + '%');
+          requestAnimationFrame(animate);
+        }
+        animate();
+
+        function update(e){
+          const rect = bg.getBoundingClientRect();
+          const p = e.touches ? e.touches[0] : e;
+          const cx = p.clientX - rect.left;
+          const cy = p.clientY - rect.top;
+          tx = (cx / rect.width) * 100;
+          ty = (cy / rect.height) * 100;
+        }
+        window.addEventListener('mousemove', update, {passive:true});
+        window.addEventListener('touchmove', update, {passive:true});
+      })();
+    </script>
   </body>
 </html>
